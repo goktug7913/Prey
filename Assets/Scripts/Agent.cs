@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -11,7 +10,7 @@ public enum AgentType
 
 public class Agent : MonoBehaviour
 {
-    AgentType type;
+    public AgentType type;
     
     float maxSpeed = 5f;
     float maxForce = 10f;
@@ -52,9 +51,10 @@ public class Agent : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        Sense();
+        Behaviour();
     }
     
     /**
@@ -67,6 +67,10 @@ public class Agent : MonoBehaviour
         rb = this.AddComponent<Rigidbody2D>();
         sr = this.AddComponent<SpriteRenderer>();
         collider = this.AddComponent<BoxCollider2D>();
+        
+        sr.drawMode = SpriteDrawMode.Sliced;
+        sr.size = new Vector2(radius, radius);
+        sr.sprite = Resources.Load<Sprite>("Sprites/Triangle");
         
         rb.gravityScale = 0f; // No gravity, we're looking top down. Into the microcosmos. Y axis is forward.
         rb.mass = mass;
@@ -87,9 +91,13 @@ public class Agent : MonoBehaviour
      * Apply a force to the agent
      * @param force The force to apply
      */
-    public void ApplyForce(Vector2 force)
+    private void ApplyForce(Vector2 force)
     {
-        rb.AddForce(force);
+        rb.AddForce(
+            Manager.instance.bounds.Contains(transform.position)
+                ? force
+                : -force
+                );
     }
     
     /**
@@ -126,15 +134,33 @@ public class Agent : MonoBehaviour
     private void Wander()
     {
         // Both prey and predators wander around if they're not chasing or fleeing
+        // Wander is a combination of seek and flee
+        // We seek a random position in front of us, and flee a random position behind us
+        // This creates a wandering effect
+        var seekTarget = (Vector2)transform.position + (Vector2)transform.up * 5f;
+        var fleeTarget = (Vector2)transform.position - (Vector2)transform.up * 5f;
+        
+        Seek(seekTarget);
+        Flee(fleeTarget);
     }
 
     /**
-     * Sense other agents in the scene
+     * Sense other agents in detectable range
      */
     private void Sense()
     {
         sensedAgents.Clear();
-        sensedAgents.AddRange(Physics2D.OverlapCircleAll(transform.position, senseRange));
+        var colliders = Physics2D.OverlapCircleAll(transform.position, senseRange);
+        
+        foreach (var collider in colliders)
+        {
+            if (collider.gameObject == this.gameObject) continue;
+            
+            var agent = collider.GetComponent<Agent>();
+            if (agent == null) continue;
+            
+            sensedAgents.Add(agent);
+        }
     }
 
     private void Behaviour()
@@ -142,16 +168,35 @@ public class Agent : MonoBehaviour
         switch (type)
         {
             case AgentType.Predator:
+                // Chase and hunt closes prey, if no target, wander
+                // Find closest prey
+                var closestPrey = sensedAgents.Find(agent => agent.type == AgentType.Prey);
+                if (closestPrey != null)
+                {
+                    Seek(closestPrey.transform.position);
+                }
+                else
+                {
+                    Wander();
+                }
                 break;
             
             case AgentType.Prey:
+                // Flee from closest predator, if no predator, wander
+                // Find closest predator
+                var closestPredator = sensedAgents.Find(agent => agent.type == AgentType.Predator);
+                if (closestPredator != null)
+                {
+                    Flee(closestPredator.transform.position);
+                }
+                else
+                {
+                    Wander();
+                }
                 break;
             
             default:
                 throw new UnityException("Agent type not set");
         }
     }
-    
-
-
 }
