@@ -22,6 +22,7 @@ public class Manager : MonoBehaviour
             throw new UnityException("Multiple managers in scene");
         }
         
+        
         // Spawn 10 prey
         for (var i = 0; i < 10; i++)
         {
@@ -69,5 +70,11 @@ public class Manager : MonoBehaviour
             UnityEngine.Random.Range(bounds.xMin, bounds.xMax),
             UnityEngine.Random.Range(bounds.yMin, bounds.yMax)
         );
+    }
+    
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(bounds.center, bounds.size);
     }
 }

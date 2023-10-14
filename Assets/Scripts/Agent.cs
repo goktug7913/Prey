@@ -93,11 +93,11 @@ public class Agent : MonoBehaviour
      */
     private void ApplyForce(Vector2 force)
     {
-        rb.AddForce(
-            Manager.instance.bounds.Contains(transform.position)
-                ? force
-                : -force
-                );
+        rb.AddForce(force);
+        
+        
+        // Face the direction of movement
+        transform.up = rb.velocity;
     }
     
     /**
@@ -138,10 +138,10 @@ public class Agent : MonoBehaviour
         // We seek a random position in front of us, and flee a random position behind us
         // This creates a wandering effect
         var seekTarget = (Vector2)transform.position + (Vector2)transform.up * 5f;
-        var fleeTarget = (Vector2)transform.position - (Vector2)transform.up * 5f;
+        // var fleeTarget = (Vector2)transform.position - (Vector2)transform.up * 5f;
         
         Seek(seekTarget);
-        Flee(fleeTarget);
+        // Flee(fleeTarget);
     }
 
     /**
@@ -163,6 +163,47 @@ public class Agent : MonoBehaviour
         }
     }
 
+    public void Die()
+    {
+        Manager.instance.agents.Remove(this);
+        Destroy(this.gameObject);
+    }
+    
+    private Agent SpawnChild()
+    {
+        var child = Manager.instance.SpawnAgent(type, transform.position);
+        child.generation = generation + 1;
+        return child;
+    }
+
+    private void Eat(Agent target)
+    {
+        // Distance check
+        if (
+            Vector2.Distance(
+                transform.position, 
+                target.transform.position
+                ) > radius + target.radius
+            )
+        {
+            return;
+        }
+        
+        switch (target.type)
+        {
+            case AgentType.Prey:
+                preyEaten++;
+                SpawnChild();
+                break;
+            case AgentType.Predator:
+                predatorsEaten++;
+                SpawnChild();
+                break;
+        }
+
+        target.Die();
+    }
+
     private void Behaviour()
     {
         switch (type)
@@ -174,6 +215,7 @@ public class Agent : MonoBehaviour
                 if (closestPrey != null)
                 {
                     Seek(closestPrey.transform.position);
+                    Eat(closestPrey);
                 }
                 else
                 {
