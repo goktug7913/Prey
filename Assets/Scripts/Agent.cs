@@ -80,7 +80,7 @@ public class Agent : MonoBehaviour
     
     /**
      * Set the color of the agent
-     * @param color The color to set
+     * <param name="color">color The color to set</param>
      */
     private void SetColor(Color color)
     {
@@ -89,7 +89,7 @@ public class Agent : MonoBehaviour
     
     /**
      * Apply a force to the agent
-     * @param force The force to apply
+     * <param name="force">force The force to apply</param>
      */
     private void ApplyForce(Vector2 force)
     {
@@ -101,9 +101,9 @@ public class Agent : MonoBehaviour
     
     /**
      * Seek a target position
-     * @param target The target position to seek
+     * <param name="target">target The target position to seek</param>
      */
-    public void Seek(Vector2 target)
+    private void Seek(Vector2 target)
     {
         Vector2 desired = target - (Vector2)transform.position;
         desired.Normalize();
@@ -115,9 +115,9 @@ public class Agent : MonoBehaviour
     
     /**
      * Flee from a target position
-     * @param target The target position to flee from
+     * <param name="target">target The target position to flee from</param>
      */
-    public void Flee(Vector2 target)
+    private void Flee(Vector2 target)
     {
         Vector2 desired = (Vector2)transform.position - target;
         desired.Normalize();
