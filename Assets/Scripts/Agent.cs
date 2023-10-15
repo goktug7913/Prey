@@ -95,7 +95,6 @@ public class Agent : MonoBehaviour
     {
         rb.AddForce(force);
         
-        
         // Face the direction of movement
         transform.up = rb.velocity;
     }
