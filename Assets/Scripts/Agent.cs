@@ -164,13 +164,13 @@ public class Agent : MonoBehaviour
 
     public void Die()
     {
-        Manager.instance.agents.Remove(this);
+        SimulationManager.instance.agents.Remove(this);
         Destroy(this.gameObject);
     }
     
     private Agent SpawnChild()
     {
-        var child = Manager.instance.SpawnAgent(type, transform.position);
+        var child = SimulationManager.instance.SpawnAgent(type, transform.position);
         child.generation = generation + 1;
         return child;
     }

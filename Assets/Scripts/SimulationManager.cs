@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Manager : MonoBehaviour
+
+[Serializable] public class SimulationManager : MonoBehaviour
 {
-    public static Manager instance;
+    public static SimulationManager instance;
     
     public List<Agent> agents = new();
 
