@@ -211,7 +211,7 @@ public class Agent : MonoBehaviour
                 // Chase and hunt closes prey, if no target, wander
                 // Find closest prey
                 var closestPrey = sensedAgents.Find(agent => agent.type == AgentType.Prey);
-                if (closestPrey != null)
+                if (closestPrey)
                 {
                     Seek(closestPrey.transform.position);
                     Eat(closestPrey);
@@ -226,7 +226,7 @@ public class Agent : MonoBehaviour
                 // Flee from closest predator, if no predator, wander
                 // Find closest predator
                 var closestPredator = sensedAgents.Find(agent => agent.type == AgentType.Predator);
-                if (closestPredator != null)
+                if (closestPredator)
                 {
                     Flee(closestPredator.transform.position);
                 }
